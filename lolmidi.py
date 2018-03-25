@@ -185,6 +185,53 @@ def firstrun(port):
             if msg[0][0][2] == 0:
                 continue  
             rightclick = str(msg[0][0][1])
+        print("Press key for mouse up:")
+        mouseup = ''
+        while True:
+            if mouseup is not '':
+                break
+            msg = port.read(1)
+            if not msg:
+                continue   
+            if msg[0][0][2] == 0:
+                continue  
+            mouseup = str(msg[0][0][1])
+        print("Press key for mouse down:")
+        mousedown = ''
+        while True:
+            if mousedown is not '':
+                break
+            msg = port.read(1)
+            if not msg:
+                continue   
+            if msg[0][0][2] == 0:
+                continue  
+            mousedown = str(msg[0][0][1])
+        print("Press key for mouse right:")
+        mouseright = ''
+        while True:
+            if mouseright is not '':
+                break
+            msg = port.read(1)
+            if not msg:
+                continue   
+            if msg[0][0][2] == 0:
+                continue  
+            mouseright = str(msg[0][0][1])
+        print("Press key for mouse down:")
+        mouseleft = ''
+        while True:
+            if mouseleft is not '':
+                break
+            msg = port.read(1)
+            if not msg:
+                continue   
+            if msg[0][0][2] == 0:
+                continue  
+            mouseleft = str(msg[0][0][1])
+        sensitivity = input("Insert your sensitivity (default 50): ")
+        if sensitivity == '':
+            sensitivity = "50"
         jsondict = {
             'min_range': str(range_midi[0]),
             'max_range': str(range_midi[1]),
@@ -195,7 +242,12 @@ def firstrun(port):
             'd': d,
             'f': f,
             'leftclick': leftclick,
-            'rightclick': rightclick
+            'rightclick': rightclick,
+            'mouseup': mouseup,
+            'mousedown': mousedown,
+            'mouseright': mouseright,
+            'mouseleft': mouseleft,
+            'sensitivity': sensitivity
         }
         with open("config.json", "w") as filee:
             json.dump(jsondict, filee)
@@ -204,8 +256,14 @@ def readconfig(parameter):
     parameter = str(parameter)
     read = open("config.json", "r")
     xd = json.load(read)
-    return xd[parameter]
-
+    try:
+        return xd[parameter]
+    except KeyError:
+        print("Your config.json file is corrupted or outdated, please remove config.json and try again.")
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
 device = get_device()
 port = pygame.midi.Input(device)
 firstrun(port)
@@ -218,6 +276,11 @@ d = int(readconfig('d'))
 f = int(readconfig('f'))
 leftclick = int(readconfig('leftclick'))
 rightclick = int(readconfig('rightclick'))
+mouseup = int(readconfig('mouseup'))
+mousedown = int(readconfig('mousedown'))
+mouseright = int(readconfig('mouseright'))
+mouseleft = int(readconfig('mouseleft'))
+sensitivity = int(readconfig('sensitivity'))
 #####################
 while True:
     try:
@@ -241,7 +304,15 @@ while True:
         if  msg[0][0][1] == leftclick:
             mouse.click(button='left')
         if  msg[0][0][1] == rightclick:
-            mouse.right_click()             
+            mouse.right_click()
+        if msg[0][0][1] == mouseup:
+                mouse.move(0, -sensitivity, absolute=False)
+        if msg[0][0][1] == mousedown:
+                mouse.move(0, sensitivity, absolute=False)
+        if msg[0][0][1] == mouseright:
+                mouse.move(sensitivity, 0, absolute=False)
+        if msg[0][0][1] == mouseleft:
+                mouse.move(-sensitivity, 0, absolute=False)               
         print(msg)
     except KeyboardInterrupt:
         break
