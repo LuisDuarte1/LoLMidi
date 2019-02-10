@@ -13,7 +13,7 @@ This is a python program to play League of Legends with any midi in device.
 
 ---
 
-#What I've Learned
+# What I've Learned
 
 1. How to use the midi protocol
 2. How to move the mouse in python
